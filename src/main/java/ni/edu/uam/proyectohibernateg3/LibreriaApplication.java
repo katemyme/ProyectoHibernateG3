@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import ni.edu.uam.proyectohibernateg3.database.JPAUtil;
 
 import java.io.IOException;
 
@@ -19,5 +20,11 @@ public class LibreriaApplication extends Application {
         // Evita que la ventana se achique más de su tamaño inicial
         stage.setMinWidth(stage.getWidth());
         stage.setMinHeight(stage.getHeight());
+    }
+
+    @Override
+    public void stop() {
+        // Cierra la conexión de Hibernate al salir de la aplicación
+        JPAUtil.cerrar();
     }
 }

@@ -78,11 +78,15 @@ public class LibreriaController {
         try
             {
             Libro libro = obtenerFormulario();
+            if (libro == null) {
+                return;
+            }
             libroDAO.guardar(libro);
             limpiarCampos();
             cargarLibros();
             }catch(Exception ex){
             ex.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "No se pudo guardar el libro: " + ex.getMessage());
         }
     }
 
@@ -94,6 +98,7 @@ public class LibreriaController {
             tblLibros.setItems(FXCollections.observableList(Libros));
         }catch(Exception ex){
             ex.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "No se pudieron cargar los libros: " + ex.getMessage());
         }
     }
 
@@ -135,6 +140,7 @@ public class LibreriaController {
 
         }catch (Exception ex){
             ex.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "No se pudo eliminar el libro: " + ex.getMessage());
         }
     }
 
@@ -180,12 +186,22 @@ public class LibreriaController {
             mostrarAlerta(Alert.AlertType.WARNING, "El año debe ser un número entero.");
             return null;
         }
+        // Mismo rango que la restricción chk_anio de la tabla
+        if (anio < 1450 || anio > 2100) {
+            mostrarAlerta(Alert.AlertType.WARNING, "El año debe estar entre 1450 y 2100.");
+            return null;
+        }
 
         BigDecimal precio;
         try {
             precio = new BigDecimal(txtPrecio.getText().trim());
         } catch (NumberFormatException ex) {
             mostrarAlerta(Alert.AlertType.WARNING, "El precio debe ser un número válido (ej. 250.50).");
+            return null;
+        }
+        // Mismo límite que la restricción chk_precio de la tabla
+        if (precio.signum() < 0) {
+            mostrarAlerta(Alert.AlertType.WARNING, "El precio no puede ser negativo.");
             return null;
         }
 
