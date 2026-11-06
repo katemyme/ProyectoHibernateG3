@@ -8,4 +8,6 @@ module ni.edu.uam.proyectohibernateg {
     exports ni.edu.uam.proyectohibernateg3;
     exports ni.edu.uam.proyectohibernateg3.controller;
     opens ni.edu.uam.proyectohibernateg3.controller to javafx.fxml;
+    // PropertyValueFactory lee los getters de Libro por reflexión
+    opens ni.edu.uam.proyectohibernateg3.model to javafx.base;
 }

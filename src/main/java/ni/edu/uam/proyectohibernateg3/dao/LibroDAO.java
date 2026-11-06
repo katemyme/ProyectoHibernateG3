@@ -29,6 +29,50 @@ public class LibroDAO {
         }
     }
 
+    public void actualizar(Libro libro) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            // merge copia los datos del objeto sobre el registro existente con el mismo id
+            em.merge(libro);
+            tx.commit();
+        } catch (RuntimeException ex) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw ex;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Devuelve true si el libro existía y se eliminó, false si no se encontró
+    public boolean eliminar(long id) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            Libro libro = em.find(Libro.class, id);
+            if (libro == null) {
+                tx.rollback();
+                return false;
+            }
+            em.remove(libro);
+            tx.commit();
+            return true;
+        } catch (RuntimeException ex) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw ex;
+        } finally {
+            em.close();
+        }
+    }
+
     public List<Libro> listar() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
