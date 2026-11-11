@@ -5,11 +5,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import ni.edu.uam.proyectohibernateg3.dao.CategoriaDAO;
 import ni.edu.uam.proyectohibernateg3.dao.LibroDAO;
+import ni.edu.uam.proyectohibernateg3.model.Categoria;
 import ni.edu.uam.proyectohibernateg3.model.Libro;
 
 import java.math.BigDecimal;
@@ -26,6 +29,8 @@ public class LibreriaController {
     private TextField txtAnio;
     @FXML
     private TextField txtPrecio;
+    @FXML
+    private ComboBox<Categoria> cmbCategoria;
 
     @FXML
     private Button btnModificar;
@@ -51,8 +56,10 @@ public class LibreriaController {
     private TableColumn<Libro, Integer> colAnio;
     @FXML
     private TableColumn<Libro, BigDecimal> colPrecio;
-
+    @FXML
+    private TableColumn<Libro, String> colCategoria;
     private final LibroDAO libroDAO = new LibroDAO();
+    private final CategoriaDAO categoriaDAO = new CategoriaDAO();
 
     private Long idSeleccionado = null;
 
@@ -63,7 +70,7 @@ public class LibreriaController {
         colAutor.setCellValueFactory(new PropertyValueFactory<>("autor"));
         colAnio.setCellValueFactory(new PropertyValueFactory<>("anioPublicacion"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
-
+        colCategoria.setCellValueFactory(new PropertyValueFactory<>("categoria"));
         tblLibros.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 seleccionarLibro(newValue);
@@ -71,6 +78,17 @@ public class LibreriaController {
         });
 
         actualizarBotones();
+
+        try {
+            cargarCategorias();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "No se pudieron cargar las categorías: " + ex.getMessage());
+        }
+    }
+
+    private void cargarCategorias() {
+        cmbCategoria.setItems(FXCollections.observableList(categoriaDAO.listar()));
     }
 
     @FXML
@@ -94,6 +112,8 @@ public class LibreriaController {
     private void cargarLibros() {
         try {
             List<Libro> Libros = libroDAO.listar();
+            // Refresca también las categorías por si se agregaron nuevas en la base de datos
+            cargarCategorias();
             limpiarCampos();
             tblLibros.setItems(FXCollections.observableList(Libros));
         }catch(Exception ex){
@@ -150,6 +170,7 @@ public class LibreriaController {
         txtAutor.clear();
         txtAnio.clear();
         txtPrecio.clear();
+        cmbCategoria.setValue(null);
         idSeleccionado = null;
         tblLibros.getSelectionModel().clearSelection();
         actualizarBotones();
@@ -161,7 +182,22 @@ public class LibreriaController {
         txtAutor.setText(libro.getAutor());
         txtPrecio.setText(String.valueOf(libro.getPrecio()));
         txtAnio.setText(String.valueOf(libro.getAnioPublicacion()));
+        cmbCategoria.setValue(buscarCategoria(libro.getCategoria()));
         actualizarBotones();
+    }
+
+    // Busca en el ComboBox la categoría con el mismo id; se compara por id porque
+    // la categoría del libro y las del ComboBox son objetos de consultas distintas
+    private Categoria buscarCategoria(Categoria categoria) {
+        if (categoria == null) {
+            return null;
+        }
+        for (Categoria c : cmbCategoria.getItems()) {
+            if (c.getId().equals(categoria.getId())) {
+                return c;
+            }
+        }
+        return null;
     }
 
     private void actualizarBotones() {
@@ -205,11 +241,19 @@ public class LibreriaController {
             return null;
         }
 
+        // La columna categoria_id es NOT NULL, así que la categoría es obligatoria
+        Categoria categoria = cmbCategoria.getValue();
+        if (categoria == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Debe seleccionar una categoría.");
+            return null;
+        }
+
         Libro libro = new Libro();
         libro.setTitulo(titulo);
         libro.setAutor(autor);
         libro.setAnioPublicacion(anio);
         libro.setPrecio(precio);
+        libro.setCategoria(categoria);
         return libro;
     }
 

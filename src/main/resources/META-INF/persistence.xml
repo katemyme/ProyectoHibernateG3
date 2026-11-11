@@ -3,6 +3,7 @@
              <persistence-unit name="bibliotecaPU" transaction-type="RESOURCE_LOCAL">
                  <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
                  <class>ni.edu.uam.proyectohibernateg3.model.Libro</class>
+                 <class>ni.edu.uam.proyectohibernateg3.model.Categoria</class>
                  <properties>
                      <!--PosgreSQL -->
                      <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>

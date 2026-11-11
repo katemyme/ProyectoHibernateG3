@@ -8,7 +8,7 @@ public class Libro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @Column(name = "titulo", nullable = false, length = 150)
     private String titulo;
@@ -21,6 +21,10 @@ public class Libro {
 
     @Column(name = "precio", nullable = false, precision = 12, scale = 2)
     private BigDecimal precio;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
 
     public Libro() {
     }
@@ -71,5 +75,13 @@ public class Libro {
 
     public void setPrecio(BigDecimal precio) {
         this.precio = precio;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 }
