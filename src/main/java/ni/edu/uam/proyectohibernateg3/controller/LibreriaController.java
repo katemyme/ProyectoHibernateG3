@@ -88,8 +88,15 @@ public class LibreriaController {
     }
 
     private void cargarCategorias() {
-        cmbCategoria.setItems(FXCollections.observableList(categoriaDAO.listar()));
-    }
+        try {
+            List<Categoria> categorias =
+                    categoriaDAO.listar();
+            cmbCategoria.setItems(FXCollections.observableList(categorias));
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "No se pudieron cargar categorias: " + e.getMessage());}
+    };
+
 
     @FXML
     private void guardarLibro() {
